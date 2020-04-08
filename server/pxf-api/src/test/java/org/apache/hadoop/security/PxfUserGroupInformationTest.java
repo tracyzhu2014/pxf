@@ -159,6 +159,7 @@ public class PxfUserGroupInformationTest {
     public void testReloginFromKeytabNoopForNonKeytab() throws KerberosAuthException {
         user.setLogin(mockLoginContext);
         PowerMockito.mockStatic(KerberosUtil.class);
+        when(KerberosUtil.getKrb5LoginModuleName()).thenReturn("com.sun.security.auth.module.Krb5LoginModule");
         when(KerberosUtil.hasKerberosKeyTab(subject)).thenReturn(false); // simulate no keytab for subject
         ugi = new UserGroupInformation(subject);
         ugi.setAuthenticationMethod(UserGroupInformation.AuthenticationMethod.KERBEROS);

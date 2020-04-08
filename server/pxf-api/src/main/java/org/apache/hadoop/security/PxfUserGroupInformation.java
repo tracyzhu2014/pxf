@@ -49,7 +49,7 @@ public abstract class PxfUserGroupInformation {
     private static final boolean aix = System.getProperty("os.name").equals("AIX");
 
     // package-private Subject provider to allow mock Subjects having User during testing
-    static Supplier<Subject> subjectProvider = () -> new Subject();
+    static Supplier<Subject> subjectProvider = Subject::new;
 
     // For Tracing purposes to make sure the loginCount and reloginCount remains reasonable
     private static final Map<String, AtomicLong> loginCountMap = new HashMap<>();
@@ -124,8 +124,7 @@ public abstract class PxfUserGroupInformation {
 
         UserGroupInformation ugi = loginSession.getLoginUser();
 
-        if (ugi.getAuthenticationMethod() != UserGroupInformation.AuthenticationMethod.KERBEROS ||
-                !ugi.isFromKeytab()) {
+        if (ugi.getAuthenticationMethod() != UserGroupInformation.AuthenticationMethod.KERBEROS) {
             LOG.error("Did not attempt to relogin from keytab: auth={}, fromKeyTab={}", ugi.getAuthenticationMethod(), ugi.isFromKeytab());
             return;
         }
@@ -373,7 +372,10 @@ public abstract class PxfUserGroupInformation {
 
             USER_KERBEROS_OPTIONS.put("renewTGT", "true");
             USER_KERBEROS_OPTIONS.putAll(BASIC_JAAS_OPTIONS);
-            USER_KERBEROS_LOGIN = new AppConfigurationEntry(KerberosUtil.getKrb5LoginModuleName(), AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL, USER_KERBEROS_OPTIONS);
+            USER_KERBEROS_LOGIN = new AppConfigurationEntry(
+                    KerberosUtil.getKrb5LoginModuleName(),
+                    AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL,
+                    USER_KERBEROS_OPTIONS);
             KEYTAB_KERBEROS_OPTIONS = new HashMap<>();
             if (PlatformName.IBM_JAVA) {
                 KEYTAB_KERBEROS_OPTIONS.put("credsType", "both");
