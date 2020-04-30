@@ -1,12 +1,12 @@
-ARG BASE_IMAGE=gpdb-pxf-dev:centos6
+ARG BASE_IMAGE=pivotaldata/gpdb-pxf-dev:centos6
 
-FROM pivotaldata/${BASE_IMAGE} as scratch
+FROM ${BASE_IMAGE} as scratch
 
-ADD singlecluster/singlecluster-*.tar.gz /
+ADD singlecluster-*.tar.gz /
 
 RUN cd / && mv singlecluster-* singlecluster && chmod a+w singlecluster
 
-FROM pivotaldata/${BASE_IMAGE}
+FROM ${BASE_IMAGE}
 
 COPY --from=scratch /singlecluster /singlecluster
 
