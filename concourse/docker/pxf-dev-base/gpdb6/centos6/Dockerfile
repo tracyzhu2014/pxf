@@ -14,14 +14,16 @@ RUN mkdir -p /tmp/pxf_src/ && cd /tmp && \
     echo >> /etc/bashrc 'export PATH=${GOPATH}/bin:/usr/local/go/bin:$PATH'
 
 # install dependencies that are missing on the base images
-RUN cd /tmp && wget -q http://curl.haxx.se/download/curl-7.51.0.tar.bz2 && \
-    tar -xjf curl-*.tar.bz2 && rm curl-*.tar.bz2 && cd curl-* && \
-    ./configure --prefix=/usr --with-gssapi > log-file 2>&1 && make -j4 >> log-file 2>&1 && \
-    make install >> log-file 2>&1 && rm -rf /tmp/curl-* && \
-    wget -q https://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo \
-      -O /etc/yum.repos.d/epel-apache-maven.repo && \
-    yum install -y rpm-build python-paramiko apache-maven python-devel sudo && yum clean all && \
-    rm /etc/yum.repos.d/epel-apache-maven.repo && ldconfig
+RUN curl_version=curl-7.51.0 && \
+    wget -q -O "/tmp/${curl_version}.tar.bz2" "http://curl.haxx.se/download/${curl_version}.tar.bz2" && \
+    tar -C /tmp -xjf "/tmp/${curl_version}.tar.bz2" && rm "/tmp/${curl_version}.tar.bz2" && \
+    "/tmp/${curl_version}/configure" --prefix=/usr --with-gssapi > /tmp/log-file 2>&1 && \
+    make -C "/tmp/${curl_version}" -j4 >> /tmp/log-file 2>&1 && \
+    make -C "/tmp/${curl_version}" install >> /tmp/log-file 2>&1 && \
+    rm -rf "/tmp/${curl_version}" /tmp/log-file && \
+    wget -q https://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo && \
+    yum install -y rpm-build python-paramiko apache-maven python-devel sudo && yum clean all && rm /etc/yum.repos.d/epel-apache-maven.repo && \
+    pip install psi --no-cache-dir && ldconfig
 
 # create user gpadmin since GPDB cannot run under root
 RUN ssh-keygen -t rsa -N "" -f /root/.ssh/id_rsa && \
@@ -53,5 +55,4 @@ ADD . /tmp/build/
 RUN tar -xzf /tmp/build/pxf-build-dependencies.tar.gz -C ~gpadmin/ && \
     rm -rf /tmp/build && \
     ln -s ~gpadmin/.{tomcat,go-dep-cached-sources,m2,gradle} ~root && \
-    chown -R gpadmin:gpadmin ~gpadmin && \
-    su gpadmin -c "sudo pip install psi --no-cache-dir"
+    chown -R gpadmin:gpadmin ~gpadmin
