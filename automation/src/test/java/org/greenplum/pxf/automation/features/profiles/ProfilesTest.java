@@ -306,7 +306,7 @@ public class ProfilesTest extends BaseFeature {
 
         exTable.setProfile(null);
         exTable.setProfile(EnumPxfDefaultProfiles.HdfsTextSimple.toString());
-        exTable.setUserParameters(new String[] { "COMPRESSION_CODEC=org.apache.hadoop.io.compress.BZip2Codec" });
+        exTable.setUserParameters(new String[] { "COMPRESSION_CODEC=bzip2" });
 
         gpdb.createTableAndVerify(exTable);
         runVerificationTinc();

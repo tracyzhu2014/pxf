@@ -155,7 +155,7 @@ public class HdfsWritableTextTest extends BaseWritableFeature {
     @Test(groups = { "features", "gpdb", "hcfs", "security"})
     public void textFormatCopyDefaultCodec() throws Exception {
 
-        writableExTable.setCompressionCodec(COMPRESSION_CODEC);
+        writableExTable.setCompressionCodec("default");
         gpdb.createTableAndVerify(writableExTable);
         insertData(dataTable, writableExTable, InsertionMethod.COPY);
 

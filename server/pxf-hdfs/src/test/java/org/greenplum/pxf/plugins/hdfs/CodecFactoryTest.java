@@ -118,4 +118,14 @@ public class CodecFactoryTest {
     private void testIsThreadSafe(String testDescription, String path, String codecStr, boolean expectedResult) {
         assertEquals(testDescription, expectedResult, factory.isCodecThreadSafe(codecStr, path, new Configuration()));
     }
+
+    @Test
+    public void getCodecGzipShortName() {
+        Configuration conf = new Configuration();
+        String name = "gzip";
+
+        CompressionCodec codec = factory.getCodec(name, conf);
+        assertNotNull(codec);
+        assertEquals(".gz", codec.getDefaultExtension());
+    }
 }

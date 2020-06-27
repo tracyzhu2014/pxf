@@ -10,10 +10,18 @@ import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class CodecFactory {
 
-    private static Logger LOG = LoggerFactory.getLogger(CodecFactory.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CodecFactory.class);
     private static final CodecFactory codecFactoryInstance = new CodecFactory();
+    private static final Map<String, String> codecMap = new HashMap<String, String>() {{
+        put("bzip2", "org.apache.hadoop.io.compress.BZip2Codec");
+        put("default", "org.apache.hadoop.io.compress.DefaultCodec");
+        put("gzip", "org.apache.hadoop.io.compress.GzipCodec");
+    }};
 
     /**
      * Returns the {@link CompressionCodecName} for the given name, or default if name is null
@@ -44,6 +52,9 @@ public class CodecFactory {
      * @return generated CompressionCodec
      */
     public CompressionCodec getCodec(String name, Configuration conf) {
+        if (codecMap.containsKey(name)) {
+            name = codecMap.get(name);
+        }
         return ReflectionUtils.newInstance(getCodecClass(name, conf), conf);
     }
 
