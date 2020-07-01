@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.greenplum.pxf.automation.features.BaseFeature;
 import org.greenplum.pxf.automation.structures.tables.pxf.ReadableExternalTable;
 import org.greenplum.pxf.automation.structures.tables.pxf.WritableExternalTable;
+import org.greenplum.pxf.automation.utils.jsystem.report.ReportUtils;
 import org.greenplum.pxf.automation.utils.system.ProtocolEnum;
 import org.greenplum.pxf.automation.utils.system.ProtocolUtils;
 import org.testng.annotations.Test;
@@ -53,7 +54,8 @@ public class HdfsWritableAvroTest extends BaseFeature {
             "type_enum_mood mood",
             "type_long_array BIGINT[]",
             "type_numeric_array NUMERIC(8,1)[]",
-            "type_string_array TEXT[]"
+            "type_string_array TEXT[]",
+            "type_date DATE"
     };
     private static final String[] AVRO_COMPLEX_TABLE_COLS_READABLE = new String[]{
             "type_int int",
@@ -61,7 +63,8 @@ public class HdfsWritableAvroTest extends BaseFeature {
             "type_enum_mood TEXT",
             "type_long_array TEXT",
             "type_numeric_array TEXT",
-            "type_string_array TEXT"
+            "type_string_array TEXT",
+            "type_date TEXT"
     };
     private String gpdbTable;
     private String hdfsPath;
@@ -296,7 +299,9 @@ public class HdfsWritableAvroTest extends BaseFeature {
             return;
         }
         for (File file : filesToDelete) {
-            file.delete();
+            if (!file.delete()) {
+                ReportUtils.startLevel(null, getClass(), String.format("Problem deleting file '%s'", file));
+            }
         }
         dropComplexTypes();
     }
@@ -332,7 +337,8 @@ public class HdfsWritableAvroTest extends BaseFeature {
                 "CASE WHEN (i%2) = 0 THEN 'sad' ELSE 'happy' END::mood," +
                 "('{' || i::varchar(255) || ',' || (i*10)::varchar(255) || ',' || (i*100)::varchar(255) || '}')::BIGINT[], " +
                 "('{' || (i*1.0001)::varchar(255) || ',' || ((i*10.00001)*10)::varchar(255) || ',' || ((i*100.000001)*100)::varchar(255) || '}')::NUMERIC(8,1)[], " +
-                "('{\"item ' || ((i-1)*10)::varchar(255) || '\",\"item ' || (i*10)::varchar(255) || '\",\"item ' || ((i+1)*10)::varchar(255) || '\"}')::TEXT[] " +
+                "('{\"item ' || ((i-1)*10)::varchar(255) || '\",\"item ' || (i*10)::varchar(255) || '\",\"item ' || ((i+1)*10)::varchar(255) || '\"}')::TEXT[], " +
+                "date '2001-09-28' + i " +
                 "from generate_series(1, 100) s(i);");
     }
 
@@ -343,7 +349,8 @@ public class HdfsWritableAvroTest extends BaseFeature {
                 "CASE WHEN (i%3) = 0 THEN 'sad' WHEN (i%2) = 0 THEN 'happy' ELSE NULL END::mood, " +
                 "('{' || i::varchar(255) || ',' || (i*10)::varchar(255) || ',' || (i*100)::varchar(255) || '}')::BIGINT[], " +
                 "('{' || (i*1.0001)::varchar(255) || ',' || ((i*10.00001)*10)::varchar(255) || ',' || ((i*100.000001)*100)::varchar(255) || '}')::NUMERIC(8,1)[], " +
-                "('{\"item ' || ((i-1)*10)::varchar(255) || '\",\"item ' || (i*10)::varchar(255) || '\",\"item ' || ((i+1)*10)::varchar(255) || '\"}')::TEXT[] " +
+                "('{\"item ' || ((i-1)*10)::varchar(255) || '\",\"item ' || (i*10)::varchar(255) || '\",\"item ' || ((i+1)*10)::varchar(255) || '\"}')::TEXT[], " +
+                "date '2001-09-28' + i " +
                 "from generate_series(1, 100) s(i);");
     }
 
